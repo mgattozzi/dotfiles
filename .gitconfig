@@ -1,0 +1,23 @@
+[user]
+	email = self@mgattozzi.dev
+	name = Michael Gattozzi
+[fetch]
+	recurseSubmodules = true
+[push]
+	default = current
+[merge]
+	conflictStyle = diff3
+[pager]
+	diff = delta
+	log = delta
+	reflog = delta
+	show = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	plus-style = "syntax #012800"
+	minus-style = "syntax #340001"
+	navigate = true
+	line-numbers = true
+	side-by-side = true
+	colorMoved = default
