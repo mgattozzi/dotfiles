@@ -4,11 +4,7 @@ refreshed=false;
 
 # Check for if the program exists or not
 function does_not_exist() {
-  if which "$1" &> /dev/null; then
-    return 1;
-  else
-    return 0;
-  fi
+  ! which "$1" &> /dev/null
 }
 
 function install() {
