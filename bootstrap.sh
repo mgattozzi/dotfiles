@@ -12,17 +12,25 @@ function does_not_exist() {
 }
 
 function install() {
-  echo "🔎 Checking if $1 is installed.";
-  if does_not_exist "$1"; then
+  # Sometimes the name of the program is not the name of the binary
+  # Handle that by checking for a second value to use for the display
+  # name, but use the first one as the install name
+  if [ "$#" -ne 2 ]; then
+    prog=$1;
+  else
+    prog=$2;
+  fi
+  echo "🔎 Checking if $prog is installed.";
+  if does_not_exist "$prog"; then
     if [ "$refreshed" == "false" ]; then
       $update &> /dev/null;
       refreshed=true;
     fi
-    echo "❌ $1 is not installed. Installing.";
+    echo "❌ $prog is not installed. Installing.";
     $install "$1" &> /dev/null;
-    echo "✔️ $1 is  installed.";
+    echo "✔️ $prog is installed.";
   else
-    echo "✔️ $1 is already installed. Skipping.";
+    echo "✔️ $prog is already installed. Skipping.";
   fi
 }
 
@@ -30,7 +38,7 @@ function cargo_install() {
   # Sometimes the name of the program is not the name of the binary
   # Handle that by checking for a second value to use for the display
   # name, but use the first one as the install name
-  if [ -z "$2" ]; then
+  if [ "$#" -ne 2 ]; then
     prog=$1;
   else
     prog=$2;
@@ -77,6 +85,44 @@ function install_neovim() {
   fi
 }
 
+function symlink_file() {
+  echo "🔎 Checking if $1 is symlinked.";
+  if [ ! -f .zshrc ]; then
+    echo "❌ $1 is not symlinked. Symlinking.";
+    ln -s "$config_dir/$1" .
+    echo "✔️  $1 is symlinked.";
+  else
+    echo "✔️ $1 is already  symlinked. Skipping.";
+  fi
+}
+
+function symlink_dir() {
+  echo "🔎 Checking if $1 is symlinked.";
+  if [ ! -d $1 ]; then
+    echo "❌ $1 is not symlinked. Symlinking.";
+    ln -s "$config_dir/$1" .
+    echo "✔️ $1 is symlinked.";
+    if [ "$#" -eq 2 ]; then
+      echo "🏃 Running install step for $1";
+      $2;
+    fi
+  else
+    echo "✔️ $1 is already  symlinked. Skipping.";
+  fi
+}
+
+function install_fzf() {
+  cd .fzf || exit;
+  ./install --bin &> /dev/null;
+  cd .. || exit;
+}
+
+function install_neovim_deps() {
+  # Due to the non blockind nature I couldn't get PackerInstall to then run
+  git clone https://github.com/wbthomason/packer.nvim \
+    "$HOME/.local/share/nvim/site/pack/packer/start/packer.nvim" &> /dev/null;
+}
+
 # Get the operating system on so that commands that differ can be carried out
 operating_system=$(cat < /etc/os-release | head -n 1 | cut -d= -f 2 | cut -d'"' -f2);
 
@@ -88,7 +134,6 @@ if [ "$operating_system" == "Arch Linux" ]; then
   out=$?
   if [ $out -ne 0 ]; then
     install "base-devel";
-    install "openssl";
   fi
 elif [ "$operating_system" == "Ubuntu" ]; then
   install="sudo apt-get -y install";
@@ -97,8 +142,8 @@ elif [ "$operating_system" == "Ubuntu" ]; then
   out=$?;
   if [ $out -ne 0 ]; then
     install "build-essential";
-    install "libssl-dev";
   fi
+  install "libssl-dev";
 else
   echo Unsupported OS for dotfiles;
   exit 1;
@@ -116,6 +161,8 @@ install "jq";
 install "bmake";
 install "cmake";
 install "autoconf";
+install "openssl";
+install "openssh" "ssh";
 install_neovim;
 zsh_location="/bin/zsh";
 current_shell="$(cat < /etc/passwd | grep "$USER" | cut -d':' -f 7)";
@@ -150,47 +197,22 @@ else
   echo "✔️ rust-analyzer is already installed. Skipping.";
 fi
 
-mkdir -p "$HOME/.config";
 config_dir=$(pwd);
+
+mkdir -p "$HOME/.config";
 cd "$HOME/.config" || exit;
-if [ ! -d base16-shell ]; then
-  ln -s "$config_dir/base16-shell" .;
-fi
+symlink_dir "base16-shell";
+symlink_dir "nvim" install_neovim_deps;
 
-if [ ! -d nvim ]; then
-  ln -s "$config_dir/nvim" .
-  git clone https://github.com/wbthomason/packer.nvim \
-    "$HOME/.local/share/nvim/site/pack/packer/start/packer.nvim";
-  nvim --headless +PackerInstall +q &> /dev/null;
-fi
-cd "$config_dir" || exit;
-
-touch "$HOME/.work.zsh";
-touch "$HOME/.private.zsh";
 cd "$HOME" || exit;
-if [ ! -d .zshrc.d ]; then
-  ln -s "$config_dir/.zshrc.d" .
-fi
-if [ ! -d .fzf ]; then
-  ln -s "$config_dir/fzf" .fzf
-  # Install fzf
-  cd .fzf || exit;
-  ./install --bin &> /dev/null;
-  cd .. || exit;
-fi
-if [ ! -f .zshrc ]; then
-  ln -s "$config_dir/.zshrc" .
-fi
-if [ ! -f .zshenv ]; then
-  ln -s "$config_dir/.zshenv" .
-fi
-if [ ! -f .zprofile ]; then
-  ln -s "$config_dir/.zprofile" .
-fi
-if [ ! -f .gitconfig ]; then
-  ln -s "$config_dir/.gitconfig" .
-fi
-if [ ! -f .tmux.conf ]; then
-  ln -s "$config_dir/.tmux.conf" .
-fi
-rm -rf .bash* &> /dev/null;
+# We just want to make sure these files are here. We'll actually will them with
+# aliases and secrets over time
+touch "$HOME/.zshrc.d/work.zsh";
+touch "$HOME/.zshrc.d/private.zsh";
+symlink_dir ".fzf" install_fzf;
+symlink_dir ".zshrc.d";
+symlink_file ".zshrc";
+symlink_file ".zshenv";
+symlink_file ".zprofile";
+symlink_file ".gitconfig";
+symlink_file ".tmux.conf";
