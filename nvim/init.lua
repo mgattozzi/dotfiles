@@ -149,21 +149,32 @@ end
 -- Vim Settings --
 ------------------
 -- global
+o.autoindent = true
 o.autoread = true
 o.autowrite = true
 o.backspace = 'indent,eol,start'
 o.backupcopy = 'yes'
+o.compatible = false
+o.completeopt = "menuone,noinsert,noselect"
+o.expandtab = true
+o.fileencoding = 'UTF-8'
+o.formatoptions = 'tcq'
 o.hlsearch = true
 o.ignorecase = true
 o.incsearch = true
 o.lcs = 'tab:/|/,space:·'
-o.compatible = false
+o.shiftwidth = 2
+o.shortmess = "Sc"
 o.showmatch = true
 o.smartcase = true
+o.smartindent = true
+o.softtabstop = 2
+o.syntax = 'on'
+o.tabstop = 2
+o.textwidth = 80
 o.timeoutlen = 1000
 o.ttimeoutlen = 0
-o.completeopt = "menuone,noinsert,noselect"
-o.shortmess = "Sc"
+o.undofile = true
 
 if sys.is_linux or sys.is_macos then
   o.undodir = os.getenv('HOME') .. '/.vim/undo-dir'
@@ -179,19 +190,6 @@ wo.list = true
 wo.number = true
 wo.relativenumber = true
 wo.wrap = true
-
--- buffer-local
-bo.autoindent = true
-bo.expandtab = true
-bo.fileencoding = 'UTF-8'
-bo.formatoptions = 'tcq'
-bo.shiftwidth = 2
-bo.smartindent = true
-bo.softtabstop = 2
-bo.syntax = 'on'
-bo.tabstop = 2
-bo.textwidth = 80
-bo.undofile = true
 
 -- Colorscheme
 vim.g.base16colorspace = 256
@@ -260,6 +258,7 @@ vmap('<leader>la', tb..'lsp_code_actions()<cr>')
 -------------------
 vim.g.rustfmt_autosave = 1
 vim.g.rustfmt_recommended_style = 0
+vim.g.rust_recommended_style = 0
 vim.g.mix_format_on_save = 1
 
 ------------------

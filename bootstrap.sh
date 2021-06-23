@@ -87,7 +87,7 @@ function install_neovim() {
 
 function symlink_file() {
   echo "🔎 Checking if $1 is symlinked.";
-  if [ ! -f .zshrc ]; then
+  if [ ! -f $1 ]; then
     echo "❌ $1 is not symlinked. Symlinking.";
     ln -s "$config_dir/$1" .
     echo "✔️  $1 is symlinked.";
@@ -143,7 +143,11 @@ elif [ "$operating_system" == "Ubuntu" ]; then
   if [ $out -ne 0 ]; then
     install "build-essential";
   fi
-  install "libssl-dev";
+  dpkg -l libssl-dev &> /dev/null;
+  out=$?;
+  if [ $out -ne 0 ]; then
+    install "libssl-dev";
+  fi
 else
   echo Unsupported OS for dotfiles;
   exit 1;
@@ -181,10 +185,19 @@ if does_not_exist "rustup"; then
   rustup component add rust-src &> /dev/null;
 fi
 
+cargo_install "bottom" "btm";
+cargo_install "broot";
+cargo_install "choose";
+cargo_install "du-dust" "dust";
 cargo_install "exa";
 cargo_install "fd-find" "fd";
-cargo_install "starship";
+cargo_install "gping";
+cargo_install "hyperfine";
+cargo_install "procs";
 cargo_install "ripgrep" "rg";
+cargo_install "sd";
+cargo_install "starship";
+cargo_install "zoxide";
 
 echo "🔎 Checking if rust-analyzer is installed.";
 if does_not_exist "rust-analyzer"; then
