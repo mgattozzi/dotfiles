@@ -167,6 +167,7 @@ install "cmake";
 install "autoconf";
 install "openssl";
 install "openssh" "ssh";
+install "less";
 install_neovim;
 zsh_location="/bin/zsh";
 current_shell="$(cat < /etc/passwd | grep "$USER" | cut -d':' -f 7)";
@@ -193,6 +194,7 @@ cargo_install "exa";
 cargo_install "fd-find" "fd";
 cargo_install "gping";
 cargo_install "hyperfine";
+cargo_install "mdbook";
 cargo_install "procs";
 cargo_install "ripgrep" "rg";
 cargo_install "sd";
@@ -229,3 +231,7 @@ symlink_file ".zshenv";
 symlink_file ".zprofile";
 symlink_file ".gitconfig";
 symlink_file ".tmux.conf";
+symlink_file ".lesskey";
+if [ ! -f "$HOME/.less" ]; then
+  lesskey $HOME/.lesskey
+fi
