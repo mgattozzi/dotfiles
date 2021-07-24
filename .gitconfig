@@ -1,19 +1,18 @@
-[user]
-	email = self@mgattozzi.dev
-	name = Michael Gattozzi
-[fetch]
-	recurseSubmodules = true
-[push]
-	default = current
-[merge]
-	conflictStyle = diff3
-[pager]
-	diff = delta
-	log = delta
-	reflog = delta
-	show = delta
-[interactive]
-	diffFilter = delta --color-only
+[alias]
+	ctx = blame
+[advice]
+	statusHints = false
+[branch]
+	autoSetupRebase = always
+[checkout]
+	defaultRemote = origin
+	workers = -1
+	thresholdForParallelism = 50
+[core]
+	hideDotFiles = true
+	untrackedCache = true
+[commit]
+	status = false
 [delta]
 	plus-style = "syntax #012800"
 	minus-style = "syntax #340001"
@@ -21,3 +20,53 @@
 	line-numbers = true
 	side-by-side = true
 	colorMoved = default
+[diff]
+	renames= copies
+	algorithm = histogram
+[fetch]
+	recurseSubmodules = true
+	parallel = 0
+	prune = true
+	output = compact
+[feature]
+	experimental = true
+	manyFiles = true
+[index]
+	version = 4
+	recordEndOfIndexEntries = true
+	recordOffsetTable = true
+	threads = true
+[init]
+	defaultBranch = main
+[interactive]
+	diffFilter = delta --color-only
+[log]
+	abbrevCommit = true
+[merge]
+	conflictStyle = diff3
+[pager]
+	diff = delta
+	log = delta
+	reflog = delta
+	show = delta
+[push]
+	default = current
+[rebase]
+	autoSquash = true
+	autoStash = true
+	abbreviateCommands = true
+[rerere]
+	enabled = true
+	autoUpdate = true
+[status]
+	short = true
+	branch = true
+	renames = copies
+	showUntrackedFiles = all
+	submoduleSummary = true
+[submodule]
+	recurse = true
+	fetchJobs = 0
+[user]
+	email = self@mgattozzi.dev
+	name = Michael Gattozzi
