@@ -1,0 +1,5 @@
+#command
+n forw-line
+e back-line
+j repeat-search
+k reverse-search

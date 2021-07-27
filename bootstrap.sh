@@ -184,6 +184,11 @@ fi
 
 cargo_install "bottom" "btm";
 cargo_install "broot";
+cargo_install "cargo-cache";
+cargo_install "cargo-edit";
+cargo_install "cargo-expand";
+cargo_install "cargo-outdated";
+cargo_install "cargo-udeps";
 cargo_install "choose";
 cargo_install "du-dust" "dust";
 cargo_install "exa";

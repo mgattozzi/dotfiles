@@ -11,6 +11,11 @@ for f in $HOME/.zshrc.d/*; do
   source $f;
 done
 
+# Source Completions Options
+for f in $HOME/.zshrc.d/completions/*; do
+  source $f;
+done
+
 # If not in tmux start it up and if we're in tmux skip
 if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
   tmux attach -t default || tmux new -s default
