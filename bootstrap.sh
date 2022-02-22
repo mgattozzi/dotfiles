@@ -175,6 +175,7 @@ fi
 # Install Rust programs
 if does_not_exist "rustup"; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh;
+  source "$HOME/.cargo/env";
   rustup install stable &> /dev/null;
   rustup target add wasm32-wasi &> /dev/null;
   rustup target add wasm32-unknown-unknown &> /dev/null;
@@ -199,7 +200,9 @@ cargo_install "mdbook";
 cargo_install "procs";
 cargo_install "ripgrep" "rg";
 cargo_install "sd";
+cargo_install "sqlx-cli" "sqlx";
 cargo_install "starship";
+cargo_install "xh";
 cargo_install "zoxide";
 
 echo "🔎 Checking if rust-analyzer is installed.";

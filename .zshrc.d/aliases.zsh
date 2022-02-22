@@ -11,5 +11,8 @@ alias vi='nvim'
 alias vim='nvim'
 alias vimf='nvim $(fzf)'
 
+## Ubuntu
+alias clip='xclip -sel clip'
+
 ## WSL2
 alias pbcopy='/mnt/c/Windows/System32/clip.exe'

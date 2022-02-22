@@ -59,7 +59,9 @@ packer.startup(function()
     use 'tbastos/vim-lua'
     use 'tpope/vim-commentary'
     use 'tpope/vim-fugitive'
-    use 'nvim-lualine/lualine.nvim'
+    use 'vim-airline/vim-airline'
+    use 'vim-airline/vim-airline-themes'
+    use 'tpope/vim-abolish'
     use 'neovim/nvim-lspconfig'
     use 'simrat39/rust-tools.nvim'
     use 'kyazdani42/nvim-web-devicons'
@@ -203,26 +205,19 @@ vim.cmd([[command! -bang -nargs=* Rg call fzf#vim#grep('rg --column --no-heading
 vim.cmd([[command! -bang -nargs=* Gfp call fzf#vim#gitfiles('', fzf#vim#with_preview('right'))]])
 
 --------------------------
--- Lualine Settings --
+-- Vim-Airline Settings --
 --------------------------
-require('lualine').setup()
-
-------------------------
--- Telescope Settings --
-------------------------
-local tb = "<cmd>lua require('telescope.builtin')."
-nmap('<leader>ff', tb..'find_files()<cr>')
-nmap('<leader>fg', tb..'live_grep()<cr>')
-nmap('<leader>fb', tb..'buffer()<cr>')
-nmap('<leader>fh', tb..'help_tags()<cr>')
-nmap('<leader>la', tb .. 'lsp_code_actions(require("telescope.themes").get_cursor())<cr>')
-
-require("telescope").setup {
-  extensions = {
-    ["ui-select"] = {
-      require("telescope.themes").get_dropdown {}
-    }
-  }
-}
-require("telescope").load_extension("ui-select")
+local a = 'airline#extensions#'
+local gset = vim.api.nvim_set_var
+gset(a..'tabline#enabled', 1)
+gset(a..'branch#enabled', 1)
+gset(a..'branch#empty_message', '')
+gset(a..'branch#use_vcscommand', 0)
+gset(a..'branch#displayed_head_limit', 10)
+gset(a..'branch#format', 0)
+gset(a..'hunks#enabled', 1)
+gset(a..'hunks#non_zero_only', 0)
+gset(a..'hunks#hunk_symbols', "['+', '~', '-']")
+vim.cmd([[let g:airline_theme='base16']])
+gset('airline_powerline_fonts', 1)
 

@@ -21,12 +21,8 @@ if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
   tmux attach -t default || tmux new -s default
 fi
 
-# Setup broot
-source /home/michael/.config/broot/launcher/bash/br
-
 # Setup zoxide
 eval "$(zoxide init zsh)"
 
 # Setup the prompt
 eval "$(starship init zsh)"
-
