@@ -7,3 +7,5 @@ fi
 if [ -f "$HOME/.google-cloud-sdk/google-cloud-sdk/completion.zsh.inc" ]; then
   . "$HOME/.google-cloud-sdk/google-cloud-sdk/completion.zsh.inc";
 fi
+
+export CLOUDSDK_PYTHON=/usr/bin/python2

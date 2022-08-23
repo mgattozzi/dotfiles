@@ -1,5 +1,6 @@
 [alias]
 	ctx = blame
+	dft = difftool
 [advice]
 	statusHints = false
 [branch]
@@ -13,6 +14,7 @@
 	untrackedCache = true
 [commit]
 	status = false
+	verbose = true
 [delta]
 	plus-style = "syntax #012800"
 	minus-style = "syntax #340001"
@@ -23,6 +25,8 @@
 [diff]
 	renames= copies
 	algorithm = histogram
+	external = difft
+	tool = difftastic
 [fetch]
 	recurseSubmodules = true
 	parallel = 0
@@ -38,17 +42,10 @@
 	threads = true
 [init]
 	defaultBranch = main
-[interactive]
-	diffFilter = delta --color-only
 [log]
 	abbrevCommit = true
 [merge]
 	conflictStyle = diff3
-[pager]
-	diff = delta
-	log = delta
-	reflog = delta
-	show = delta
 [push]
 	default = current
 [rebase]
@@ -62,7 +59,6 @@
 	short = true
 	branch = true
 	renames = copies
-	showUntrackedFiles = all
 	submoduleSummary = true
 [submodule]
 	recurse = true
@@ -70,3 +66,9 @@
 [user]
 	email = self@mgattozzi.dev
 	name = Michael Gattozzi
+[pager]
+	difftool = true
+[difftool]
+	prompt = false
+[difftool "difftastic"]
+	cmd = difft "$LOCAL" "$REMOTE"

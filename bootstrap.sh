@@ -192,6 +192,7 @@ cargo_install "cargo-outdated";
 cargo_install "cargo-udeps";
 cargo_install "choose";
 cargo_install "du-dust" "dust";
+cargo_install "difftastic" "difft";
 cargo_install "exa";
 cargo_install "fd-find" "fd";
 cargo_install "gping";
