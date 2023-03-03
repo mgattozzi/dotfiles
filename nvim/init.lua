@@ -1,7 +1,190 @@
---------------------------
--- Caching for init.lua --
---------------------------
-require('impatient')
+-- Plugin loader
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-------------
+-- Plugins --
+-------------
+vim.g.mapleader = " "
+require('lazy').setup({
+    {
+      'RRethy/nvim-base16',
+      config = function()
+        -- Colorscheme
+        vim.o.termguicolors = true
+        vim.g.base16colorspace = 256
+        vim.cmd('colorscheme base16-default-dark')
+      end
+    },
+    { 
+      'SmiteshP/nvim-gps',
+      config = function()
+        require("nvim-gps").setup()
+      end
+    },
+    'editorconfig/editorconfig-vim',
+    'f-person/git-blame.nvim',
+    {
+      "folke/trouble.nvim",
+      config = function()
+        local nnoremap = require('maps').nnoremap
+        require('trouble').setup()
+        nnoremap('<leader>xx','<cmd>TroubleToggle<cr>')
+        nnoremap('<leader>xw','<cmd>TroubleToggle workspace_diagnostics<cr>')
+        nnoremap('<leader>xd','<cmd>TroubleToggle document_diagnostics<cr>')
+        nnoremap('<leader>xq','<cmd>TroubleToggle quickfix<cr>')
+        nnoremap('<leader>xl','<cmd>TroubleToggle loclist<cr>')
+      end
+    },
+    {
+      'kevinhwang91/nvim-hlslens',
+      config = function()
+        require('hlslens').setup()
+      end
+    },
+    {
+      'kyazdani42/nvim-tree.lua',
+      config = function()
+        local nnoremap = require('maps').nnoremap
+        require('nvim-tree').setup()
+        nnoremap('<C-n>', ':NvimTreeToggle<CR>')
+        nnoremap('<leader>r', ':NvimTreeRefresh<CR>')
+      end
+    },
+    'kyazdani42/nvim-web-devicons',
+    {
+      'lewis6991/gitsigns.nvim',
+      config = function()
+        require('gitsigns').setup()
+      end
+    },
+    {
+      'lukas-reineke/indent-blankline.nvim',
+      config = function()
+        vim.opt.list = true
+        vim.opt.listchars:append("space:⋅")
+        require('indent_blankline').setup({
+            space_char_blankline = " ",
+            show_current_context = true,
+            show_current_context_start = true,
+        })
+      end
+    },
+    {
+      'm-demare/hlargs.nvim',
+      config = function()
+        require('hlargs').setup()
+      end
+    },
+    'neovim/nvim-lspconfig',
+    {
+      'noib3/nvim-cokeline',
+      config = function()
+        require('cokeline').setup({
+          sidebar = {
+            filetype = 'NvimTree',
+            components = {
+              {
+                text = '  NvimTree',
+                style = 'bold',
+              },
+            }
+          },
+        })
+      end
+    },
+    {
+      'numToStr/Comment.nvim',
+      config = function()
+        require('Comment').setup()
+      end
+    },
+    'nvim-lua/plenary.nvim',
+    'nvim-lua/popup.nvim',
+    {
+      'nvim-lualine/lualine.nvim',
+      config = function()
+        local gps = require("nvim-gps")
+        require('lualine').setup({
+          extensions = {'nvim-tree'},
+          sections = {
+            lualine_c = {'filename', { gps.get_location, cond = gps.is_available } },
+          },
+        })
+      end
+    },
+    'nvim-telescope/telescope-ui-select.nvim',
+    {
+      'nvim-telescope/telescope.nvim',
+      config = function()
+        local nnoremap = require('maps').nnoremap
+        require('telescope').setup()
+        require('telescope').load_extension('notify')
+        require("telescope").load_extension("ui-select")
+        tb = require('telescope.builtin');
+        nnoremap('<leader>ff', '<cmd> lua tb.find_files()<cr>')
+        nnoremap('<leader>fg', '<cmd> lua tb.live_grep()<cr>')
+        nnoremap('<leader>fb', '<cmd> lua tb.buffers()<cr>')
+        nnoremap('<leader>fh', '<cmd> lua tb.help_tags()<cr>')
+        nnoremap('<leader>fi', '<cmd> lua tb.current_buffer_fuzzy_find()<cr>')
+        nnoremap('<leader>ca', '<cmd> lua vim.lsp.buf.code_action()<cr>')
+        nnoremap('<leader>gb', '<cmd> lua tb.git_branches()<cr>')
+        nnoremap('<leader>ts', '<cmd> lua tb.treesitter()<cr>')
+      end
+    },
+    {
+      'petertriho/nvim-scrollbar',
+      config = function()
+        require('scrollbar').setup({
+            handle = {
+              color = '#b8b8b8',
+            },
+            handlers = {
+                search = true,
+            },
+        })
+      end
+    },
+    {
+      'rust-lang/rust.vim',
+      ft = 'rs',
+    },
+    {
+      'simrat39/rust-tools.nvim',
+      ft = 'rs',
+      config = function()
+        require('rust-tools').setup()
+      end
+    },
+    'yamatsum/nvim-cursorline',
+    {
+      'rcarriga/nvim-notify',
+      config = function()
+        vim.notify = require('notify')
+      end
+    },
+    { 
+      'nvim-treesitter/nvim-treesitter',
+      config = function()
+        require('nvim-treesitter.configs').setup {
+          ensure_installed = "all",
+          highlight = {
+            enable = true,
+          },
+        }
+      end
+    },
+})
 
 -------------------
 -- Local Imports --
@@ -18,6 +201,7 @@ local fn = vim.fn
 local o = vim.o
 local wo = vim.wo
 local bo = vim.bo
+local g = vim.g
 
 -----------------------------
 -- Remap Function Bindings --
@@ -28,60 +212,26 @@ local noremap = maps.noremap
 local vmap = maps.vmap
 local vnoremap = maps.vnoremap
 
--------------
--- Plugins --
--------------
-local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-if fn.empty(fn.glob(install_path)) > 0 then
-  packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
-end
-require('packer').startup(function()
-  use {
-    'RRethy/nvim-base16',
-    'SmiteshP/nvim-gps',
-    'bronson/vim-trailing-whitespace',
-    'editorconfig/editorconfig-vim',
-    'ellisonleao/carbon-now.nvim',
-    'f-person/git-blame.nvim',
-    'folke/which-key.nvim',
-    'folke/zen-mode.nvim',
-    'kevinhwang91/nvim-hlslens',
-    'kyazdani42/nvim-tree.lua',
-    'kyazdani42/nvim-web-devicons',
-    'lewis6991/gitsigns.nvim',
-    'lewis6991/impatient.nvim',
-    'lukas-reineke/indent-blankline.nvim',
-    'm-demare/hlargs.nvim',
-    'neovim/nvim-lspconfig',
-    'noib3/nvim-cokeline',
-    'numToStr/Comment.nvim',
-    'nvim-lua/plenary.nvim',
-    'nvim-lua/popup.nvim',
-    'nvim-lualine/lualine.nvim',
-    'nvim-neorg/neorg',
-    'nvim-neorg/neorg-telescope',
-    'nvim-telescope/telescope-ui-select.nvim',
-    'nvim-telescope/telescope.nvim',
-    'p00f/nvim-ts-rainbow',
-    'petertriho/nvim-scrollbar',
-    'rust-lang/rust.vim',
-    'simrat39/rust-tools.nvim',
-    'wbthomason/packer.nvim',
-    'yamatsum/nvim-cursorline',
-  }
-  use {
-    'nvim-treesitter/nvim-treesitter',
-    before = "neorg",
-    run = ':TSUpdate'
-  }
-  if packer_bootstrap then
-    require('packer').sync()
-  end
-end)
-
 ------------------
 -- Vim Settings --
 ------------------
+
+-- Undo History
+if sys.is_linux or sys.is_macos then
+  o.undodir = os.getenv('HOME') .. '/.vim/undo-dir'
+elseif sys.is_windows then
+  o.undodir = fn.stdpath('data') .. '\\undo-dir'
+end
+if fs.does_not_exist(o.undodir) and (sys.is_linux or sys.is_macos) then
+  os.execute('mkdir -p' .. o.undodir .. '-m=0770')
+elseif fs.does_not_exist(o.undodir) and sys.is_windows then
+  os.execute('mkdir ' .. o.undodir)
+end
+
+-- Autocmd
+vim.cmd('filetype plugin indent on')
+vim.cmd('autocmd BufWritePost plugins.lua PackerCompile')
+vim.cmd('autocmd BufRead,BufNewFile *.md,*.txt setlocal spell spelllang=en_us')
 
 -- Global
 o.autoindent = true
@@ -111,11 +261,10 @@ o.ttimeoutlen = 0
 o.undofile = true
 o.laststatus = 2
 
-if sys.is_linux or sys.is_macos then
-  o.undodir = os.getenv('HOME') .. '/.vim/undo-dir'
-elseif sys.is_windows then
-  o.undodir = fn.stdpath('data') .. '\\undo-dir'
-end
+g.rustfmt_autosave = 1
+g.rustfmt_recommended_style = 0
+g.rust_recommended_style = 0
+g.mix_format_on_save = 1
 
 -- Window Local
 wo.colorcolumn = '101'
@@ -126,24 +275,7 @@ wo.wrap = true
 o.foldmethod='expr'
 o.foldexpr='nvim_treesitter#foldexpr()'
 
--- Colorscheme
-vim.g.base16colorspace = 256
-vim.cmd('colorscheme base16-default-dark')
-vim.cmd('filetype plugin indent on')
-
--- Autocmd
-vim.cmd('autocmd BufWritePost plugins.lua PackerCompile')
-vim.cmd('autocmd BufRead,BufNewFile *.md,*.txt setlocal spell spelllang=en_us')
-
--- Keep undo history across sessions by storing it in a file
-if fs.does_not_exist(o.undodir) and (sys.is_linux or sys.is_macos) then
-  os.execute('mkdir -p' .. o.undodir .. '-m=0770')
-elseif fs.does_not_exist(o.undodir) and sys.is_windows then
-  os.execute('mkdir ' .. o.undodir)
-end
-
 -- Colemak Remaps
-vim.g.mapleader = " "
 noremap('n','gj')
 noremap('e','gk')
 noremap('i','l')
@@ -175,163 +307,3 @@ nnoremap('<leader>gfp',':Gfp<CR>')
 nnoremap('<leader>z','zA')
 -- Remove trailing whitespace
 nmap('<leader>rtws',':%s/\\s\\+$//e<CR>')
-
-
-------------------------
--- Nvim Plugin Configs -
-------------------------
-
--- Git Signs - Left sidebar git indicators
-require('gitsigns').setup()
-
--- NvimTree - File navigator sidebar
-require('nvim-tree').setup()
-nnoremap('<C-n>', ':NvimTreeToggle<CR>')
-nnoremap('<leader>r', ':NvimTreeRefresh<CR>')
-
--- Which Key - Helpful pop up of what keybindings exist
-require("which-key").setup()
-
--- Nvim GPS - status line component to show where you are in a file
-require("nvim-gps").setup()
-local gps = require("nvim-gps")
-
--- Lualine - status line plugin
-require('lualine').setup({
-  extensions = {'nvim-tree'},
-  sections = {
-    lualine_c = {'filename', { gps.get_location, cond = gps.is_available } },
-  },
-})
-
--- Cokeline - Bufferbar plugin
-require('cokeline').setup({
-  sidebar = {
-    filetype = 'NvimTree',
-    components = {
-      {
-        text = '  NvimTree',
-        style = 'bold',
-      },
-    }
-  },
-})
-
--- Indent Blankline - Show indentation and what block your in
-vim.opt.list = true
-vim.opt.listchars:append("space:⋅")
-require('indent_blankline').setup({
-    space_char_blankline = " ",
-    show_current_context = true,
-    show_current_context_start = true,
-})
-
--- NVIM TreeSitter - Treesitter configs
-require('nvim-treesitter.configs').setup {
-  ensure_installed = "all",
-  highlight = {
-    enable = true,
-  },
-  rainbow = {
-    enable = true,
-    extended_mode = true,
-    max_file_lines = nil,
-  }
-
-}
-local parser_configs = require('nvim-treesitter.parsers').get_parser_configs()
-parser_configs.norg_meta = {
-    install_info = {
-        url = "https://github.com/nvim-neorg/tree-sitter-norg-meta",
-        files = { "src/parser.c" },
-        branch = "main"
-    },
-}
-parser_configs.norg_table = {
-    install_info = {
-        url = "https://github.com/nvim-neorg/tree-sitter-norg-table",
-        files = { "src/parser.c" },
-        branch = "main"
-    },
-}
-
--- Neorg - A newer org mode but for neovim
-require('neorg').setup({
-    load = {
-        ['core.defaults'] = {},
-        ['core.integrations.telescope'] = {},
-        ['core.integrations.treesitter'] = {},
-        ['core.norg.manoeuvre'] = {},
-        ['core.presenter'] = {
-          config = {
-            zen_mode = 'zen-mode',
-          }
-        },
-        ['core.norg.qol.todo_items'] = {},
-        ['core.norg.qol.toc'] = {},
-        ['core.norg.esupports.metagen'] = {},
-        ['core.norg.esupports.hop'] = {},
-        ['core.norg.concealer'] = {},
-        ['core.norg.news'] = {},
-        ['core.norg.journal'] = {},
-        ['core.norg.dirman'] = {
-            config = {
-                workspaces = {
-                    notes = '~/notes',
-                }
-            }
-        }
-
-    }
-})
-
--- hlargs - Highlight function args using treesitter
-require('hlargs').setup()
-
--- Rust Tools - Setup lsp and more automatically for rust
-require('rust-tools').setup()
-
--- Carbon Now - Share snippets to Carbon for nice screenshots on the web
-require('carbon-now').setup({
-  options = {
-    theme = "Base16 (Dark)",
-    font_family = "Iosevka",
-  }
-})
-vim.keymap.set("v", "<leader>cn", function() require('carbon-now').create_snippet() end, { noremap = true, silent = true})
-
--- Telescope - Search, file finding, grepping, and more using powerful builtins
-require('telescope').setup()
-tb = require('telescope.builtin');
-nnoremap('<leader>ff', '<cmd> lua tb.find_files()<cr>')
-nnoremap('<leader>fg', '<cmd> lua tb.live_grep()<cr>')
-nnoremap('<leader>fb', '<cmd> lua tb.buffers()<cr>')
-nnoremap('<leader>fh', '<cmd> lua tb.help_tags()<cr>')
-nnoremap('<leader>fi', '<cmd> lua tb.current_buffer_fuzzy_find()<cr>')
-nnoremap('<leader>ca', '<cmd> lua tb.lsp_code_actions()<cr>')
-nnoremap('<leader>gb', '<cmd> lua tb.git_branches()<cr>')
-nnoremap('<leader>ts', '<cmd> lua tb.treesitter()<cr>')
-
-
--- Zen Mode - Have a moment of zen when writing
-require("zen-mode").setup()
-
--- Scrollbar - Add a scroll bar to neovim
-require("scrollbar").setup({
-    handle = {
-      color = '#b8b8b8',
-    },
-    handlers = {
-        search = true,
-    },
-})
--- Comment - Comment keymaps for extra powers on what to comment out
-require('Comment').setup()
-
-------------------------
--- Vim Plugin Configs --
-------------------------
-vim.g.rustfmt_autosave = 1
-vim.g.rustfmt_recommended_style = 0
-vim.g.rust_recommended_style = 0
-vim.g.mix_format_on_save = 1
