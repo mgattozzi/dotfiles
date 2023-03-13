@@ -86,7 +86,11 @@ require('lazy').setup({
         require('hlargs').setup()
       end
     },
-    'neovim/nvim-lspconfig',
+    {
+      'neovim/nvim-lspconfig',
+      config = function()
+      end
+    },
     {
       'noib3/nvim-cokeline',
       config = function()
@@ -157,13 +161,34 @@ require('lazy').setup({
     },
     {
       'rust-lang/rust.vim',
-      ft = 'rs',
     },
     {
       'simrat39/rust-tools.nvim',
-      ft = 'rs',
       config = function()
-        require('rust-tools').setup()
+        local opts = {
+          tools = {
+            runnables = {
+              use_telescope = true,
+            },
+            inlay_hints = {
+              auto = true,
+              show_parameter_hints = false,
+              parameter_hints_prefix = "",
+              other_hints_prefix = "",
+            },
+          },
+          server = {
+            on_attach = on_attach,
+            settings = {
+              ["rust-analyzer"] = {
+                checkOnSave = {
+                  command = "clippy",
+                },
+              },
+            },
+          },
+        }
+        require("rust-tools").setup(opts)
       end
     },
     'yamatsum/nvim-cursorline',
@@ -173,8 +198,15 @@ require('lazy').setup({
         vim.notify = require('notify')
       end
     },
+    {
+      "j-hui/fidget.nvim",
+      config = function()
+        require("fidget").setup()
+      end
+    },
     { 
       'nvim-treesitter/nvim-treesitter',
+      build = ':TSUpdate',
       config = function()
         require('nvim-treesitter.configs').setup {
           ensure_installed = "all",
@@ -184,6 +216,15 @@ require('lazy').setup({
         }
       end
     },
+    {
+      url = 'https://git.sr.ht/~whynothugo/lsp_lines.nvim',
+      config = function()
+        require('lsp_lines').setup()
+        vim.diagnostic.config({
+          virtual_text = false
+        })
+      end
+    }
 })
 
 -------------------
@@ -230,7 +271,6 @@ end
 
 -- Autocmd
 vim.cmd('filetype plugin indent on')
-vim.cmd('autocmd BufWritePost plugins.lua PackerCompile')
 vim.cmd('autocmd BufRead,BufNewFile *.md,*.txt setlocal spell spelllang=en_us')
 
 -- Global
@@ -243,10 +283,14 @@ o.compatible = false
 o.completeopt = "menu,menuone,noselect"
 o.expandtab = true
 o.fileencoding = 'UTF-8'
+o.foldenable = false
+o.foldexpr='nvim_treesitter#foldexpr()'
+o.foldmethod='expr'
 o.formatoptions = 'tcq'
 o.hlsearch = true
 o.ignorecase = true
 o.incsearch = true
+o.laststatus = 2
 o.shiftwidth = 2
 o.shortmess = "Sc"
 o.showmatch = true
@@ -259,12 +303,11 @@ o.textwidth = 80
 o.timeoutlen = 1000
 o.ttimeoutlen = 0
 o.undofile = true
-o.laststatus = 2
 
+g.mix_format_on_save = 1
+g.rust_recommended_style = 0
 g.rustfmt_autosave = 1
 g.rustfmt_recommended_style = 0
-g.rust_recommended_style = 0
-g.mix_format_on_save = 1
 
 -- Window Local
 wo.colorcolumn = '101'
@@ -272,8 +315,6 @@ wo.list = true
 wo.number = true
 wo.relativenumber = true
 wo.wrap = true
-o.foldmethod='expr'
-o.foldexpr='nvim_treesitter#foldexpr()'
 
 -- Colemak Remaps
 noremap('n','gj')
