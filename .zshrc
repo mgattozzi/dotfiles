@@ -21,6 +21,11 @@ if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
   tmux attach -t default || tmux new -s default
 fi
 
+ulimit -n 4096
+
+# Setup direnv
+eval "$(direnv hook zsh)"
+
 # Setup zoxide
 eval "$(zoxide init zsh)"
 
