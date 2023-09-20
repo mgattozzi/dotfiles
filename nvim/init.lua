@@ -26,12 +26,6 @@ require('lazy').setup({
         vim.cmd('colorscheme base16-default-dark')
       end
     },
-    { 
-      'SmiteshP/nvim-gps',
-      config = function()
-        require("nvim-gps").setup()
-      end
-    },
     'editorconfig/editorconfig-vim',
     'f-person/git-blame.nvim',
     {
@@ -118,11 +112,10 @@ require('lazy').setup({
     {
       'nvim-lualine/lualine.nvim',
       config = function()
-        local gps = require("nvim-gps")
         require('lualine').setup({
           extensions = {'nvim-tree'},
           sections = {
-            lualine_c = {'filename', { gps.get_location, cond = gps.is_available } },
+            lualine_c = {'filename'},
           },
         })
       end
@@ -200,6 +193,8 @@ require('lazy').setup({
     },
     {
       "j-hui/fidget.nvim",
+      tag = "legacy",
+      event = "LspAttach",
       config = function()
         require("fidget").setup()
       end
@@ -223,6 +218,20 @@ require('lazy').setup({
         vim.diagnostic.config({
           virtual_text = false
         })
+      end
+    },
+    {
+      "williamboman/mason.nvim",
+      config = function()
+        require("mason").setup()
+      end
+    },
+    {
+      "williamboman/mason-lspconfig.nvim",
+      config = function()
+        require("mason-lspconfig").setup()
+        require("lspconfig").rust_analyzer.setup {}
+        require("lspconfig").gopls.setup {}
       end
     }
 })

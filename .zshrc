@@ -29,5 +29,8 @@ eval "$(direnv hook zsh)"
 # Setup zoxide
 eval "$(zoxide init zsh)"
 
+# Setup direnv
+eval "$(direnv hook zsh)"
+
 # Setup the prompt
 eval "$(starship init zsh)"

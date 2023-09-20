@@ -1,5 +1,5 @@
 # Aliases
-alias ls="exa"
+alias ls="eza"
 
 ## Git Aliases
 alias gprune='git prune && git remote prune origin'

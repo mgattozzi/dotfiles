@@ -9,6 +9,9 @@ end
 function vnoremap(from, to)
   remap('v', from, to, {noremap = true})
 end
+function inoremap(from, to)
+  remap('i', from, to, {noremap = true})
+end
 function nmap(from, to)
   remap('n', from, to, {})
 end
