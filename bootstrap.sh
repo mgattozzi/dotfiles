@@ -30,7 +30,6 @@ function symlink_dir() {
 }
 
 config_dir=$(pwd);
-
 mkdir -p "$HOME/.config";
 cd "$HOME/.config" || exit;
 symlink_dir "base16-shell";
@@ -39,10 +38,9 @@ symlink_dir "nvim" install_neovim_deps;
 cd "$HOME" || exit;
 # We just want to make sure these files are here. We'll actually will them with
 # aliases and secrets over time
+symlink_dir ".zshrc.d";
 touch "$HOME/.zshrc.d/work.zsh";
 touch "$HOME/.zshrc.d/private.zsh";
-symlink_dir ".fzf" install_fzf;
-symlink_dir ".zshrc.d";
 symlink_file ".zshrc";
 symlink_file ".zshenv";
 symlink_file ".zprofile";
