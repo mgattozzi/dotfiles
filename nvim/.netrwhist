@@ -1,5 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =3
-let g:netrw_dirhist_3='/home/michael/work/serv-configs/clusters/commure-apps-eastus/dev/tenants/51450194/abac'
-let g:netrw_dirhist_2='/home/michael/gr/src/commands'
-let g:netrw_dirhist_1='/home/michael/.fzf'

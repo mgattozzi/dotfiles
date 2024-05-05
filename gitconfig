@@ -40,6 +40,7 @@
 	recordEndOfIndexEntries = true
 	recordOffsetTable = true
 	threads = true
+	skipHash = false
 [init]
 	defaultBranch = main
 [log]

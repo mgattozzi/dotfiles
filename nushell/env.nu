@@ -1,63 +1,85 @@
-# Nushell Environment Config File
-let-env STARSHIP_SHELL = "nu"
+$env.PATH = [
+  ($env.HOME | path join .cargo bin),
+  ($env.HOME | path join .local bin),
+  ($env.HOME | path join .bin),
+  /usr/bin
+  /usr/games
+  /usr/local/bin
+  /usr/local/games
+  /usr/local/sbin
+  /usr/sbin
+  /snap/bin
+  /bin
+  /sbin
+]
+$env.EDITOR = 'nvim'
+$env.PAGER = 'less'
+$env.TERM = 'xterm-256color'
+$env.XDG_RUNTIME_DIR = /run/user/(id -u)
 
-def create_left_prompt [] {
-    starship prompt --cmd-duration $env.CMD_DURATION_MS $'--status=($env.LAST_EXIT_CODE)'
+if not (which rustup | is-empty) {
+  $env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
+} else {
+  http get -r https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init o> rustup-init
+  chmod +x rustup-init
+  ./rustup-init
+  $env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
+  rm rustup-init
 }
 
-# Use nushell functions to define your right and left prompt
-let-env PROMPT_COMMAND = { create_left_prompt }
-let-env PROMPT_COMMAND_RIGHT = ""
-
-# The prompt indicators are environmental variables that represent
-# the state of the prompt
-let-env PROMPT_INDICATOR = ""
-let-env PROMPT_INDICATOR_VI_INSERT = ": "
-let-env PROMPT_INDICATOR_VI_NORMAL = "〉"
-let-env PROMPT_MULTILINE_INDICATOR = "::: "
-
-# Specifies how environment variables are:
-# - converted from a string to a value on Nushell startup (from_string)
-# - converted from a value back to a string when running external commands (to_string)
-# Note: The conversions happen *after* config.nu is loaded
-let-env ENV_CONVERSIONS = {
-  "PATH": {
-    from_string: { |s| $s | split row (char esep) | path expand -n }
-    to_string: { |v| $v | path expand -n | str collect (char esep) }
-  }
-  "Path": {
-    from_string: { |s| $s | split row (char esep) | path expand -n }
-    to_string: { |v| $v | path expand -n | str collect (char esep) }
-  }
+# Setup Starship Prompt
+if not (which starship | is-empty) {
+  starship init nu | save -f ~/.cache/starship/init.nu
+} else {
+  let tag = http get -H { 'Accept': 'application/json' } https://github.com/starship/starship/releases/latest
+     | get tag_name
+  let name = 'starship-x86_64-unknown-linux-gnu'
+  http get -r ('https://github.com/starship/starship/releases/download/' ++ $tag ++ '/' ++ $name ++ '.tar.gz') o> starship.tar.gz
+  tar -xvf starship.tar.gz
+  sudo mv starship /usr/bin/starship
+  rm -rf starship.tar.gz
+  mkdir ~/.cache/starship
+  starship init nu | save -f ~/.cache/starship/init.nu
 }
 
-# Directories to search for scripts when calling source or use
-#
-# By default, <nushell-config-dir>/scripts is added
-let-env NU_LIB_DIRS = [
-    ($nu.config-path | path dirname | path join 'scripts')
-]
+# Setup Carapace Autocomplete
+if not (which starship | is-empty) {
+  carapace _carapace nushell | save -f ~/.cache/carapace/init.nu
+} else {
+  "deb [trusted=yes] https://apt.fury.io/rsteube/ /" | save temp
+  sudo mv temp /etc/apt/sources.list.d/fury.list
+  sudo apt-get update
+  sudo apt-get install carapace-bin
+  mkdir ~/.cache/carapace
+  carapace _carapace nushell | save -f ~/.cache/carapace/init.nu
+}
 
-# Directories to search for plugin binaries when calling register
-#
-# By default, <nushell-config-dir>/plugins is added
-let-env NU_PLUGIN_DIRS = [
-    ($nu.config-path | path dirname | path join 'plugins')
-]
+# Setup Atuin History Search
+if not (which atuin | is-empty) {
+  atuin init nu --disable-up-arrow | save -f ~/.local/share/atuin/init.nu
+} else {
+  let tag = http get -H { 'Accept': 'application/json' } https://github.com/atuinsh/atuin/releases/latest
+     | get tag_name
+  let name = 'atuin-' ++ $tag ++ '-x86_64-unknown-linux-gnu'
+  http get -r ('https://github.com/atuinsh/atuin/releases/download/' ++ $tag ++ '/' ++ $name ++ '.tar.gz') o> atuin.tar.gz
+  tar -xvf atuin.tar.gz
+  sudo mv ($name ++ '/atuin') /usr/bin/atuin
+  rm -rf atuin.tar.gz
+  rm -rf $name
+  atuin import auto
+  mkdir ~/.local/share/atuin/
+  atuin init nu --disable-up-arrow | save -f ~/.local/share/atuin/init.nu
+}
 
-# PATH Env Var
-let-env PATH = ($env.PATH | split row (char esep) | append $'($env.HOME)/.bin')
-let-env PATH = ($env.PATH | split row (char esep) | append $'($env.HOME)/.cargo/bin')
-let-env PATH = ($env.PATH | split row (char esep) | append '/usr/bin')
-let-env PATH = ($env.PATH | split row (char esep) | append '/usr/local/bin')
-let-env PATH = ($env.PATH | split row (char esep) | sort | uniq)
-
-# Personal Env Vars
-let-env EDITOR = 'nvim'
-let-env PAGER = 'less'
-let-env TERM = 'xterm-256color'
-let-env RUST_SRC_PATH = $'(^rustc --print sysroot)/lib/rustlib/src/rust/src'
-let-env XDG_RUNTIME_DIR = $'/run/user/(^id -u)'
-let-env NVM_DIR = $'($env.HOME)/.nvm'
-let-env WASMTIME_HOME = $'($env.HOME)/.wasmtime'
-let-env CLOUDSDK_PYTHON = $'(which python2 | get path.0)'
+# Setup zoxide
+if not (which zoxide | is-empty) {
+  zoxide init nushell | save -f ~/.config/nushell/zoxide.nu
+} else {
+  let tag = http get -H { 'Accept': 'application/json' } https://github.com/ajeetdsouza/zoxide/releases/latest
+    | get tag_name 
+    | str substring 1..
+  http get -r ('https://github.com/ajeetdsouza/zoxide/releases/download/v' ++ $tag ++ '/zoxide_' ++ $tag ++ '-1_amd64.deb') o> zoxide.deb
+  sudo apt-get install ./zoxide.deb
+  rm zoxide.deb
+  zoxide init nushell | save -f ~/.config/nushell/zoxide.nu
+}
