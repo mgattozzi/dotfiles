@@ -148,6 +148,10 @@ require('lazy').setup({
     },
     {
       'rust-lang/rust.vim',
+      config = function()
+        -- Hack to get around using nushell so rustfmt works again
+        vim.opt.shell = '/bin/bash'
+      end
     },
     {
       'simrat39/rust-tools.nvim',

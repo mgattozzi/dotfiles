@@ -83,3 +83,12 @@ if not (which zoxide | is-empty) {
   rm zoxide.deb
   zoxide init nushell | save -f ~/.config/nushell/zoxide.nu
 }
+
+# Install and setup plugins
+
+# Setup Polars
+if (which polars | is-empty) {
+  cargo install --locked -f nu_plugin_polars
+  plugin add ~/.cargo/bin/nu_plugin_polars 
+  plugin use polars
+}
