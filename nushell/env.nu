@@ -17,33 +17,85 @@ $env.PAGER = 'less'
 $env.TERM = 'xterm-256color'
 $env.XDG_RUNTIME_DIR = /run/user/(id -u)
 
-if not (which rustup | is-empty) {
-  $env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
-} else {
+# Install Rust
+if (which rustup | is-empty) {
   http get -r https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init o> rustup-init
   chmod +x rustup-init
   ./rustup-init
-  $env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
   rm rustup-init
 }
 
-# Setup Starship Prompt
-if not (which starship | is-empty) {
+$env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
+
+# Install rust programs
+if (which cargo-binstall | is-empty) {
+  cargo install --locked cargo-binstall
+}
+
+if (which cargo-install-update | is-empty) {
+  cargo binstall cargo-update
+}
+
+if (which topgrade | is-empty) {
+  cargo binstall topgrade
+}
+
+if (which jj | is-empty) {
+  cargo binstall --strategies crate-meta-data jj-cli
+}
+
+if (which git-cliff | is-empty) {
+  cargo binstall git-cliff
+}
+
+if (which cargo-deny | is-empty) {
+  cargo binstall cargo-deny
+}
+
+if (which bat | is-empty) {
+  cargo binstall bat
+}
+
+if (which cargo-dist | is-empty) {
+  cargo binstall cargo-dist
+}
+
+if (which cargo-hakari | is-empty) {
+  cargo binstall cargo-hakari
+}
+
+if (which cargo-nextest | is-empty) {
+  cargo binstall cargo-nextest
+}
+
+if (which oranda | is-empty) {
+  cargo binstall oranda
+}
+
+if (which alacritty | is-empty) {
+  cargo binstall alacritty
+}
+
+if (which difft | is-empty) {
+  cargo binstall difftastic
+}
+
+if (which rg | is-empty) {
+  cargo binstall ripgrep
+}
+
+# Install Shell Programs
+## Setup Starship Prompt
+if (which starship | is-not-empty) {
   starship init nu | save -f ~/.cache/starship/init.nu
 } else {
-  let tag = http get -H { 'Accept': 'application/json' } https://github.com/starship/starship/releases/latest
-     | get tag_name
-  let name = 'starship-x86_64-unknown-linux-gnu'
-  http get -r ('https://github.com/starship/starship/releases/download/' ++ $tag ++ '/' ++ $name ++ '.tar.gz') o> starship.tar.gz
-  tar -xvf starship.tar.gz
-  sudo mv starship /usr/bin/starship
-  rm -rf starship.tar.gz
+  cargo binstall starship
   mkdir ~/.cache/starship
   starship init nu | save -f ~/.cache/starship/init.nu
 }
 
-# Setup Carapace Autocomplete
-if not (which starship | is-empty) {
+## Setup Carapace Autocomplete
+if (which carapace | is-not-empty) {
   carapace _carapace nushell | save -f ~/.cache/carapace/init.nu
 } else {
   "deb [trusted=yes] https://apt.fury.io/rsteube/ /" | save temp
@@ -54,41 +106,29 @@ if not (which starship | is-empty) {
   carapace _carapace nushell | save -f ~/.cache/carapace/init.nu
 }
 
-# Setup Atuin History Search
-if not (which atuin | is-empty) {
+## Setup Atuin History Search
+if (which atuin | is-not-empty) {
   atuin init nu --disable-up-arrow | save -f ~/.local/share/atuin/init.nu
 } else {
-  let tag = http get -H { 'Accept': 'application/json' } https://github.com/atuinsh/atuin/releases/latest
-     | get tag_name
-  let name = 'atuin-' ++ $tag ++ '-x86_64-unknown-linux-gnu'
-  http get -r ('https://github.com/atuinsh/atuin/releases/download/' ++ $tag ++ '/' ++ $name ++ '.tar.gz') o> atuin.tar.gz
-  tar -xvf atuin.tar.gz
-  sudo mv ($name ++ '/atuin') /usr/bin/atuin
-  rm -rf atuin.tar.gz
-  rm -rf $name
+  cargo binstall atuin
   atuin import auto
   mkdir ~/.local/share/atuin/
   atuin init nu --disable-up-arrow | save -f ~/.local/share/atuin/init.nu
 }
 
-# Setup zoxide
-if not (which zoxide | is-empty) {
+## Setup zoxide
+if (which zoxide | is-not-empty) {
   zoxide init nushell | save -f ~/.config/nushell/zoxide.nu
 } else {
-  let tag = http get -H { 'Accept': 'application/json' } https://github.com/ajeetdsouza/zoxide/releases/latest
-    | get tag_name 
-    | str substring 1..
-  http get -r ('https://github.com/ajeetdsouza/zoxide/releases/download/v' ++ $tag ++ '/zoxide_' ++ $tag ++ '-1_amd64.deb') o> zoxide.deb
-  sudo apt-get install ./zoxide.deb
-  rm zoxide.deb
+  cargo binstall zoxide
   zoxide init nushell | save -f ~/.config/nushell/zoxide.nu
 }
 
 # Install and setup plugins
 
-# Setup Polars
+## Setup Polars
 if (which polars | is-empty) {
-  cargo install --locked -f nu_plugin_polars
+  cargo binstall nu_plugin_polars
   plugin add ~/.cargo/bin/nu_plugin_polars 
   plugin use polars
 }
