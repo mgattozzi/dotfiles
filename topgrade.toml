@@ -1,0 +1,2 @@
+[misc]
+disable = ["containers", "gcloud", "git_repos"]
