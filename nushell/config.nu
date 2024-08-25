@@ -11,12 +11,10 @@ if $env.TMUX? == null {
 
 ulimit -n 4096
 
-## Neovim Aliases
-alias nedit = nvim ($env.HOME | path join .config nvim init.lua)
-alias rmswap = rm ($env.HOME | path join .local share nvim swap *)
-alias vi = nvim
-alias vim = nvim
-alias vimf = nvim (fzf)
+## Alias hx for muscle memory reasons
+alias vi = hx
+alias vim = hx
+alias vimf = hx (fzf)
 
 # Setup Starship Prompt
 source ~/.cache/starship/init.nu

@@ -12,10 +12,11 @@ $env.PATH = [
   /bin
   /sbin
 ]
-$env.EDITOR = 'nvim'
+$env.EDITOR = 'hx'
 $env.PAGER = 'less'
 $env.TERM = 'xterm-256color'
-$env.XDG_RUNTIME_DIR = /run/user/(id -u)
+$env.XDG_RUNTIME_DIR = "/run/user/" + (id -u)
+$env.NU_USE_IR = 1
 
 # Install Rust
 if (which rustup | is-empty) {

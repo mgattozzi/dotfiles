@@ -15,11 +15,8 @@ ln -s (pwd | $in ++ /lesskey) ~/.lesskey
 rm -f ~/.gitconfig
 ln -s (pwd | $in ++ /gitconfig) ~/.gitconfig
 
-rm -f ~/.config/nvim
-ln -s (pwd | $in ++ /nvim) ~/.config/nvim
-
-rm -f ~/.alacritty.toml
-ln -s (pwd | $in ++ /alacritty.toml) ~/.alacritty.toml
-
 rm -f ~/.config/topgrade.toml
 ln -s (pwd | $in ++ /topgrade.toml) ~/.config/topgrade.toml
+
+rm -f ~/.wezterm.lua
+ln -s (pwd | $in ++ /wezterm.lua) ~/.wezterm.lua 
