@@ -1,6 +1,7 @@
+#!/usr/bin/env nu
+
 # Remove any existing configs and symlink the dotfiles
 mkdir ~/.config/nushell
-
 rm -f ~/.config/nushell/config.nu
 rm -f ~/.config/nushell/env.nu
 ln -s (pwd | $in ++ /nushell/config.nu) ~/.config/nushell/config.nu
@@ -20,3 +21,9 @@ ln -s (pwd | $in ++ /topgrade.toml) ~/.config/topgrade.toml
 
 rm -f ~/.wezterm.lua
 ln -s (pwd | $in ++ /wezterm.lua) ~/.wezterm.lua 
+
+mkdir ~/.config/helix
+rm -f ~/.config/helix/config.toml
+rm -f ~/.config/helix/languages.toml
+ln -s (pwd | $in ++ /helix/config.toml) ~/.config/helix/config.toml
+ln -s (pwd | $in ++ /helix/languages.toml) ~/.config/helix/languages.toml

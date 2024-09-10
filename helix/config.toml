@@ -1,0 +1,37 @@
+theme = "base16_default_dark"
+
+[editor]
+auto-pairs = false
+shell = ["nu", "-c"]
+line-number = "relative"
+cursorline = true
+bufferline = "always"
+popup-border = "all"
+
+[editor.indent-guides]
+render = true
+
+[editor.soft-wrap]
+enable = true
+max-wrap = 30
+
+[keys.normal]
+n = "move_visual_line_down"
+e = "move_visual_line_up"
+h = "move_char_left"
+i = "move_char_right"
+o = "command_mode"
+
+[keys.normal.space]
+i = "insert_mode"
+n = "search_next"
+
+[keys.insert]
+up = "no_op"
+down = "no_op"
+left = "no_op"
+right = "no_op"
+pageup = "no_op"
+pagedown = "no_op"
+home = "no_op"
+end = "no_op"
