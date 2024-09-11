@@ -32,7 +32,7 @@ def unix_install():
 
 def windows_install():
     if shutil.which("rust") is None:
-        rust = "rustup-init.ext"
+        rust = "rustup-init.exe"
         res = httpx.get("https://win.rustup.rs/x86_64")
         with open(rust, "ab") as out:
             out.write(res.content)
