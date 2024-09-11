@@ -17,73 +17,7 @@ $env.PAGER = 'less'
 $env.TERM = 'xterm-256color'
 $env.XDG_RUNTIME_DIR = "/run/user/" + (id -u)
 $env.NU_USE_IR = 1
-
-# Install Rust
-if (which rustup | is-empty) {
-  http get -r https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init o> rustup-init
-  chmod +x rustup-init
-  ./rustup-init
-  rm rustup-init
-}
-
 $env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
-
-# Install rust programs
-if (which cargo-binstall | is-empty) {
-  cargo install --locked cargo-binstall
-}
-
-if (which cargo-install-update | is-empty) {
-  cargo binstall cargo-update
-}
-
-if (which topgrade | is-empty) {
-  cargo binstall topgrade
-}
-
-if (which jj | is-empty) {
-  cargo binstall --strategies crate-meta-data jj-cli
-}
-
-if (which git-cliff | is-empty) {
-  cargo binstall git-cliff
-}
-
-if (which cargo-deny | is-empty) {
-  cargo binstall cargo-deny
-}
-
-if (which bat | is-empty) {
-  cargo binstall bat
-}
-
-if (which cargo-dist | is-empty) {
-  cargo binstall cargo-dist
-}
-
-if (which cargo-hakari | is-empty) {
-  cargo binstall cargo-hakari
-}
-
-if (which cargo-nextest | is-empty) {
-  cargo binstall cargo-nextest
-}
-
-if (which oranda | is-empty) {
-  cargo binstall oranda
-}
-
-if (which alacritty | is-empty) {
-  cargo binstall alacritty
-}
-
-if (which difft | is-empty) {
-  cargo binstall difftastic
-}
-
-if (which rg | is-empty) {
-  cargo binstall ripgrep
-}
 
 # Install Shell Programs
 ## Setup Starship Prompt
@@ -125,11 +59,10 @@ if (which zoxide | is-not-empty) {
   zoxide init nushell | save -f ~/.config/nushell/zoxide.nu
 }
 
-# Install and setup plugins
+# Setup plugins
 
 ## Setup Polars
 if (which polars | is-empty) {
-  cargo binstall nu_plugin_polars
   plugin add ~/.cargo/bin/nu_plugin_polars 
   plugin use polars
 }
