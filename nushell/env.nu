@@ -2,6 +2,7 @@ $env.PATH = [
   ($env.HOME | path join .cargo bin),
   ($env.HOME | path join .local bin),
   ($env.HOME | path join .bin),
+  ($env.HOME | path join .claude local),
   /usr/bin
   /usr/games
   /usr/local/bin
@@ -16,8 +17,9 @@ $env.EDITOR = 'hx'
 $env.PAGER = 'less'
 $env.TERM = 'xterm-256color'
 $env.XDG_RUNTIME_DIR = "/run/user/" + (id -u)
-$env.NU_USE_IR = 1
 $env.RUST_SRC_PATH = $"(rustup run stable rustc --print sysroot)/lib/rustlib/src/rust/src"
+$env.config.display_errors.exit_code = false
+$env.config.display_errors.termination_signal = false
 
 # Install Shell Programs
 ## Setup Starship Prompt
@@ -63,6 +65,6 @@ if (which zoxide | is-not-empty) {
 
 ## Setup Polars
 if (which polars | is-empty) {
-  plugin add ~/.cargo/bin/nu_plugin_polars 
+  plugin add '/home/michael/.cargo/bin/nu_plugin_polars'
   plugin use polars
 }

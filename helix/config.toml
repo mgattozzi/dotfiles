@@ -1,4 +1,4 @@
-theme = "base16_default_dark"
+theme = "kanagawa-dragon"
 
 [editor]
 auto-pairs = false
@@ -7,6 +7,10 @@ line-number = "relative"
 cursorline = true
 bufferline = "always"
 popup-border = "all"
+end-of-line-diagnostics = "hint"
+
+[editor.inline-diagnostics]
+cursor-line = "error"
 
 [editor.indent-guides]
 render = true

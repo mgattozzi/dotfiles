@@ -11,3 +11,9 @@ name = "binary"
 request = "launch"
 completion = [ { name = "binary", completion = "filename" } ]
 args = { program = "{0}", initCommands = [ "command script import /usr/local/etc/lldb_vscode_rustc_primer.py" ] }
+
+[language-server.rust-analyzer.config.cargo]
+features = "all"
+
+[language-server.rust-analyzer.config.check]
+command = "clippy"

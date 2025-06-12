@@ -5,7 +5,7 @@ $env.config = {
 # If not in tmux start it up and if we're in tmux skip
 if $env.TMUX? == null {
   if (tmux attach -t default | complete | get exit_code) != 0 {
-    tmux new -s default
+    tmux new -s eva00
   }
 }
 
@@ -15,6 +15,8 @@ ulimit -n 4096
 alias vi = hx
 alias vim = hx
 alias vimf = hx (fzf)
+
+alias fg = job unfreeze
 
 # Setup Starship Prompt
 source ~/.cache/starship/init.nu
