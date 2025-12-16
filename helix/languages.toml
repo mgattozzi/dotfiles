@@ -1,19 +1,36 @@
 [[language]]
 name = "rust"
 
-[language.debugger]
-name = "lldb-vscode"
-transport = "stdio"
-command = "lldb-vscode"
-
-[[language.debugger.templates]]
-name = "binary"
-request = "launch"
-completion = [ { name = "binary", completion = "filename" } ]
-args = { program = "{0}", initCommands = [ "command script import /usr/local/etc/lldb_vscode_rustc_primer.py" ] }
-
 [language-server.rust-analyzer.config.cargo]
 features = "all"
 
 [language-server.rust-analyzer.config.check]
 command = "clippy"
+
+[[language]]
+name = "cedar"
+scope = "source.cedar"
+injection-regex = "cedar"
+file-types = ["cdr"]
+comment-token = "//"
+indent = { tab-width = 4, unit = "\t" }
+language-servers = ["cedar-lsp"]
+roots = ["Cargo.toml", "cedar.toml", ".git"]
+formatter = { command = "cedar", args = ["fmt", "--stdin"] }
+auto-format = true
+
+[language-server.cedar-lsp]
+command = "cedar"
+args = ["lsp"]
+
+[language.debugger]
+name = "gdb"
+transport = "stdio"
+command = "cedar"
+args = ["debug", "gdb", "--dap"]
+
+[[language.debugger.templates]]
+name = "binary"
+request = "launch"
+completion = [{ name = "binary", completion = "filename" }]
+args = { program = "{0}" }

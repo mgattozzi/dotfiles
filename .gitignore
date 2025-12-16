@@ -1,2 +1,4 @@
 nushell/history.*
+nushell/install.lock
+nushell/plugin.msgpackz
 .ruff_cache

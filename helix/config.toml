@@ -1,4 +1,4 @@
-theme = "kanagawa-dragon"
+theme = "kanagawa"
 
 [editor]
 auto-pairs = false
@@ -8,6 +8,14 @@ cursorline = true
 bufferline = "always"
 popup-border = "all"
 end-of-line-diagnostics = "hint"
+true-color = true
+undercurl = true
+rainbow-brackets = true
+trim-final-newlines = true
+trim-trailing-whitespace = true
+
+[editor.cursor-shape]
+insert = "underline"
 
 [editor.inline-diagnostics]
 cursor-line = "error"
