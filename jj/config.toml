@@ -1,0 +1,23 @@
+[user]
+name = "Michael Gattozzi"
+email = "michael@ductile.systems"
+
+[ui]
+diff-formatter = ["difft", "--color=always", "$left", "$right"]
+
+[git]
+colocate = true
+
+[signing]
+behavior = "own"
+backend = "ssh"
+key = "~/.ssh/id_ed25519.pub"
+
+[aliases]
+gf = ["git", "fetch", "--all-remotes"]
+
+[remotes.origin]
+auto-track-bookmarks = "glob:*"
+
+[remotes.pro]
+auto-track-bookmarks = "glob:*"

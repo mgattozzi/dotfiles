@@ -1,0 +1,7 @@
+[tools]
+carapace = "latest"
+erlang = "latest"
+gleam = "latest"
+go = "latest"
+node = "latest"
+npm = "latest"

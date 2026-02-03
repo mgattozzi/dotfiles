@@ -2,105 +2,188 @@
 
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["httpx == 0.27.0"]
+# dependencies = ["rich"]
 # ///
 
-import httpx
-import os
-from pathlib import Path
 import shutil
+import subprocess
 import sys
+from pathlib import Path
+
+from rich.console import Console
+from rich.panel import Panel
+
+console = Console()
+
+DOTFILES_DIR = Path(__file__).parent.resolve()
+HOME = Path.home()
+CONFIG = HOME / ".config"
+
+DIR_SYMLINKS = [
+    ("nushell", CONFIG / "nushell"),
+    ("helix", CONFIG / "helix"),
+    ("jj", CONFIG / "jj"),
+    ("mise", CONFIG / "mise"),
+]
+
+FILE_SYMLINKS = [
+    ("wezterm.lua", HOME / ".wezterm.lua"),
+    ("gitconfig", HOME / ".gitconfig"),
+    ("lesskey", HOME / ".lesskey"),
+    ("tmux.conf", HOME / ".tmux.conf"),
+    ("topgrade.toml", CONFIG / "topgrade.toml"),
+]
 
 
-def unix_install():
-    if shutil.which("rust") is None:
-        os.system("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh")
-    if shutil.which("carapace") is None:
-        os.system("curl termux.carapace.sh | sh")
-    if shutil.which("wezterm") is None:
-        if sys.platform == "darwin":
-            os.system("brew install --cask wezterm")
+def run(cmd: str, shell: bool = True) -> bool:
+    """Run a command and return True if successful."""
+    result = subprocess.run(cmd, shell=shell, capture_output=False)
+    return result.returncode == 0
+
+
+def install_tool(name: str, check_cmd: str, install_cmd: str) -> bool:
+    """Install a tool if not present. Returns True if successful or already installed."""
+    if shutil.which(check_cmd):
+        console.print(f"  [green]✓[/green] {name} [dim](already installed)[/dim]")
+        return True
+
+    with console.status(f"  [yellow]Installing {name}...[/yellow]"):
+        if run(install_cmd):
+            console.print(f"  [green]✓[/green] {name}")
+            return True
         else:
-            os.system(
-                "curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg"
-            )
-            os.system(
-                "echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list"
-            )
-            os.system("sudo apt-get upgrade && sudo apt-get install wezterm-nightly")
+            console.print(f"  [red]✗[/red] {name} [red](installation failed)[/red]")
+            return False
 
 
-def windows_install():
-    if shutil.which("rust") is None:
-        rust = "rustup-init.exe"
-        res = httpx.get("https://win.rustup.rs/x86_64")
-        with open(rust, "ab") as out:
-            out.write(res.content)
-        os.system(rust)
-        Path(rust).unlink()
-    if shutil.which("carapace") is None:
-        os.system("winget install -e --id rsteube.Carapace")
-    if shutil.which("wezterm") is None:
-        os.system("winget install wez.wezterm")
+def install_tools() -> bool:
+    """Install all required tools. Returns True if all successful."""
+    console.print("\n[bold]Installing tools...[/bold]")
 
+    # git (needed for cloning repos like TPM)
+    if not install_tool(
+        "git",
+        "git",
+        "sudo apt-get update && sudo apt-get install -y git",
+    ):
+        return False
 
-def src(name: str):
-    if sys.platform == "darwin" or sys.platform == "linux":
-        return Path("/home/michael/dotfiles/" + name)
+    # rustup
+    if not install_tool(
+        "rustup",
+        "rustc",
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y",
+    ):
+        return False
+
+    # Refresh PATH to find cargo
+    cargo_bin = HOME / ".cargo" / "bin"
+    if cargo_bin.exists():
+        import os
+        os.environ["PATH"] = f"{cargo_bin}:{os.environ.get('PATH', '')}"
+
+    # cargo-binstall
+    if not install_tool(
+        "cargo-binstall",
+        "cargo-binstall",
+        "curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash",
+    ):
+        return False
+
+    # nushell
+    if not install_tool(
+        "nushell",
+        "nu",
+        "cargo binstall nu --locked -y",
+    ):
+        return False
+
+    # wezterm
+    if not install_tool(
+        "wezterm",
+        "wezterm",
+        """curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg && \
+echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list && \
+sudo apt update && sudo apt install -y wezterm""",
+    ):
+        return False
+
+    # TPM (Tmux Plugin Manager)
+    tpm_dir = HOME / ".tmux" / "plugins" / "tpm"
+    if tpm_dir.exists():
+        console.print("  [green]✓[/green] TPM [dim](already installed)[/dim]")
     else:
-        # TODO: Symlink on windows
-        pass
+        with console.status("  [yellow]Installing TPM...[/yellow]"):
+            if run(f"git clone https://github.com/tmux-plugins/tpm {tpm_dir}"):
+                console.print("  [green]✓[/green] TPM")
+            else:
+                console.print("  [red]✗[/red] TPM [red](installation failed)[/red]")
+                return False
+
+    return True
 
 
-def dst(name: [str]):
-    if sys.platform == "darwin" or sys.platform == "linux":
-        return Path("/home/michael/" + name)
+def create_symlink(src: Path, dst: Path) -> bool:
+    """Create a symlink, removing existing target. Returns True if successful."""
+    try:
+        # Ensure parent directory exists
+        dst.parent.mkdir(parents=True, exist_ok=True)
+
+        # Remove existing target
+        if dst.is_symlink() or dst.exists():
+            if dst.is_dir() and not dst.is_symlink():
+                shutil.rmtree(dst)
+            else:
+                dst.unlink()
+
+        # Create symlink
+        dst.symlink_to(src)
+        return True
+    except Exception as e:
+        console.print(f"  [red]✗[/red] {src.name} → {dst} [red]({e})[/red]")
+        return False
+
+
+def create_symlinks() -> bool:
+    """Create all symlinks. Returns True if all successful."""
+    console.print("\n[bold]Creating symlinks...[/bold]")
+    all_success = True
+
+    # Directory symlinks
+    for name, dst in DIR_SYMLINKS:
+        src = DOTFILES_DIR / name
+        if create_symlink(src, dst):
+            console.print(f"  [green]✓[/green] {name} → {dst}")
+        else:
+            all_success = False
+
+    # File symlinks
+    for name, dst in FILE_SYMLINKS:
+        src = DOTFILES_DIR / name
+        if create_symlink(src, dst):
+            console.print(f"  [green]✓[/green] {name} → {dst}")
+        else:
+            all_success = False
+
+    return all_success
+
+
+def main() -> int:
+    console.print(Panel("Bootstrap", expand=False))
+
+    if not install_tools():
+        console.print("\n[red]Bootstrap failed during tool installation.[/red]")
+        return 1
+
+    symlinks_ok = create_symlinks()
+
+    if symlinks_ok:
+        console.print("\n[green]Done![/green] Run [bold]'nu'[/bold] to start nushell.")
+        return 0
     else:
-        # TODO: Symlink on windows
-        pass
+        console.print("\n[yellow]Done with errors.[/yellow] Some symlinks failed.")
+        return 1
 
 
-# TODO: Symlink on windows
-def symlink(dirs: [str], files: [(str, str)]):
-    for dir in dirs:
-        os.makedirs(name=dst(dir), exist_ok=True)
-    for src_path, dst_path in files:
-        dst_path = dst(dst_path)
-        # Remove the file if it already exists so we can link the actual file we
-        # want to the config location
-        dst_path.unlink(missing_ok=True)
-        os.symlink(src=src(src_path), dst=dst_path)
-
-
-def universal_install():
-    if shutil.which("cargo-binstall") is None:
-        os.system("cargo install --locked --force cargo-binstall")
-    os.system(
-        "cargo binstall jj-cli topgrade cargo-update git-cliff cargo-deny bat cargo-dist cargo-hakari cargo-nextest oranda difftastic ripgrep starship atuin zoxide nu_plugin_polars --force --locked --disable-telemetry -y"
-    )
-
-
-if sys.platform == "darwin" or sys.platform == "linux":
-    unix_install()
-    symlink(
-        # Directories to create if they don't exist relative to home dir
-        [".config/nushell", ".config/helix"],
-        # (Dotfile relaive path, home dir relative path)
-        [
-            ("nushell/config.nu", ".config/nushell/config.nu"),
-            ("nushell/env.nu", ".config/nushell/env.nu"),
-            ("helix/config.toml", ".config/helix/config.toml"),
-            ("helix/languages.toml", ".config/helix/languages.toml"),
-            ("wezterm.lua", ".wezterm.lua"),
-            ("topgrade.toml", ".config/topgrade.toml"),
-            ("gitconfig", ".gitconfig"),
-            ("lesskey", ".lesskey"),
-            ("tmux.conf", ".tmux.conf"),
-            ("tmux.conf", ".tmux.conf"),
-        ],
-    )
-else:
-    windows_install()
-    symlink([], [])
-
-universal_install()
+if __name__ == "__main__":
+    sys.exit(main())
